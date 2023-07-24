@@ -1,96 +1,137 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-
 const app = express();
-const port = 3000;
+const fs = require('fs');
 
+app.use(express.json());
 
-// Подключение к базе данных MongoDB
-mongoose.connect('mongodb://localhost/library', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-// Схема книги
-const bookSchema = new mongoose.Schema({
-  title: String,
-  author: String,
-});
-const Book = mongoose.model('Book', bookSchema);
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-// Запросы
-
-// GET - получение всех книг
+// Запрос GET для получения всех книг
 app.get('/books', (req, res) => {
-  Book.find((err, books) => {
+  fs.readFile('books.json', 'utf8', (err, data) => {
     if (err) {
-      res.status(500).send(err);
+      console.log(err);
+      res.status(500).send('Internal Server Error');
     } else {
+      const books = JSON.parse(data);
       res.json(books);
     }
   });
 });
 
-// GET - получение книги по bookid
-app.get('/books/:bookId', (req, res) => {
-  Book.findById(req.params.bookId, (err, book) => {
+// Запрос GET для получения книги по bookid
+app.get('/books/:bookid', (req, res) => {
+  const bookid = req.params.bookid;
+  fs.readFile('books.json', 'utf8', (err, data) => {
     if (err) {
-      res.status(500).send(err);
+      console.log(err);
+      res.status(500).send('Internal Server Error');
     } else {
-      res.json(book);
+      const books = JSON.parse(data);
+      const book = books.find(book => book.bookid === bookid);
+      if (book) {
+        res.json(book);
+      } else {
+        res.status(404).send('Book not found');
+      }
     }
   });
 });
 
-// POST - создание книги
+// Запрос POST для создания новой книги
 app.post('/books', (req, res) => {
-  const newBook = new Book(req.body);
-  newBook.save((err, book) => {
+  const { bookid, title, author } = req.body;
+  if (bookid && title && author) {
+    fs.readFile('books.json', 'utf8', (err, data) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send('Internal Server Error');
+      } else {
+        const books = JSON.parse(data);
+        const exBook = books.find(book => book.bookid === bookid);
+        if (exBook) {
+          res.status(400).send('Book with the same bookid already exists');
+        } else {
+          const newBook = { bookid, title, author };
+          books.push(newBook);
+          fs.writeFile('books.json', JSON.stringify(books), 'utf8', err => {
+            if (err) {
+              console.log(err);
+              res.status(500).send('Internal Server Error');
+            } else {
+              res.json(newBook);
+            }
+          });
+        }
+      }
+    });
+  } else {
+    res.status(400).send('Invalid request');
+  }
+});
+
+// Запрос PUT для редактирования книги по bookid
+app.put('/books/:bookid', (req, res) => {
+  const bookid = req.params.bookid;
+  const { title, author } = req.body;
+  if (title && author) {
+    fs.readFile('books.json', 'utf8', (err, data) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send('Internal Server Error');
+      } else {
+        const books = JSON.parse(data);
+        const bookIndex = books.findIndex(book => book.bookid === bookid);
+        if (bookIndex !== -1) {
+          books[bookIndex].title = title;
+          books[bookIndex].author = author;
+          fs.writeFile('books.json', JSON.stringify(books), 'utf8', err => {
+            if (err) {
+              console.log(err);
+              res.status(500).send('Internal Server Error');
+            } else {
+              res.json(books[bookIndex]);
+            }
+          });
+        } else {
+          res.status(404).send('Book not found');
+        }
+      }
+    });
+  } else {
+    res.status(400).send('Invalid request');
+  }
+});
+
+// Запрос DELETE для удаления книги по bookid
+app.delete('/books/:bookid', (req, res) => {
+  const bookid = req.params.bookid;
+  fs.readFile('books.json', 'utf8', (err, data) => {
     if (err) {
-      res.status(500).send(err);
+      console.log(err);
+      res.status(500).send('Internal Server Error');
     } else {
-      res.json(book);
+      const books = JSON.parse(data);
+      const bookIndex = books.findIndex(book => book.bookid === bookid);
+      if (bookIndex !== -1) {
+        const delBook = books.splice(bookIndex, 1);
+        fs.writeFile('books.json', JSON.stringify(books), 'utf8', err => {
+          if (err) {
+            console.log(err);
+            res.status(500).send('Internal Server Error');
+          } else {
+            res.json(delBook[0]);
+          }
+        });
+      } else {
+        res.status(404).send('Book not found');
+      }
     }
   });
 });
 
-// PUT - редактирование книги по bookid
-app.put('/books/:bookId', (req, res) => {
-  Book.findByIdAndUpdate(req.params.bookId, req.body, { new: true }, (err, book) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.json(book);
-    }
-  });
+
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
 });
 
-// DELETE - удаление книги по bookid
-app.delete('/books/:bookId', (req, res) => {
-  Book.findByIdAndRemove(req.params.bookId, (err) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.send('Book deleted');
-    }
-  });
-});
 
-// POST - авторизация
-app.post('/login', (req, res) => {
-  // Ваш код авторизации
-});
 
-// POST - регистрация
-app.post('/register', (req, res) => {
-  // Ваш код регистрации
-});
-
-// Запуск сервера
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
