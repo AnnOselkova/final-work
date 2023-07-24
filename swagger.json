@@ -1,0 +1,233 @@
+const swagger = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Book API',
+    description: 'API for managing books',
+    version: '1.0.0',
+  },
+  servers: [
+    {
+      url: 'http://localhost:3000',
+    },
+  ],
+  paths: {
+    '/books': {
+      get: {
+        summary: 'Get all books',
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/Books',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Internal Server Error',
+          },
+        },
+      },
+      post: {
+        summary: 'Create a new book',
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/NewBook',
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/Book',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request',
+          },
+          '500': {
+            description: 'Internal Server Error',
+          },
+        },
+      },
+    },
+    '/books/{bookid}': {
+      get: {
+        summary: 'Get a book by bookid',
+        parameters: [
+          {
+            name: 'bookid',
+            in: 'path',
+            description: 'The bookid of the book',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/Book',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Book not found',
+          },
+          '500': {
+            description: 'Internal Server Error',
+          },
+        },
+      },
+      put: {
+        summary: 'Update a book by bookid',
+        parameters: [
+          {
+            name: 'bookid',
+            in: 'path',
+            description: 'The bookid of the book',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UpdateBook',
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/Book',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request',
+          },
+          '404': {
+            description: 'Book not found',
+          },
+          '500': {
+            description: 'Internal Server Error',
+          },
+        },
+      },
+      delete: {
+        summary: 'Delete a book by bookid',
+        parameters: [
+          {
+            name: 'bookid',
+            in: 'path',
+            description: 'The bookid of the book',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/Book',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Book not foun
+
+ChatGPT | Нейросети, [24.07.2023 3:11]
+d',
+          },
+          '500': {
+            description: 'Internal Server Error',
+          },
+        },
+      },
+    },
+  },
+  components: {
+    schemas: {
+      Book: {
+        type: 'object',
+        properties: {
+          bookid: {
+            type: 'string',
+          },
+          title: {
+            type: 'string',
+          },
+          author: {
+            type: 'string',
+          },
+        },
+      },
+      Books: {
+        type: 'array',
+        items: {
+          $ref: '#/components/schemas/Book',
+        },
+      },
+      NewBook: {
+        type: 'object',
+        properties: {
+          bookid: {
+            type: 'string',
+          },
+          title: {
+            type: 'string',
+          },
+          author: {
+            type: 'string',
+          },
+        },
+        required: ['bookid', 'title', 'author'],
+      },
+      UpdateBook: {
+        type: 'object',
+        properties: {
+          title: {
+            type: 'string',
+          },
+          author: {
+            type: 'string',
+          },
+        },
+        required: ['title', 'author'],
+      },
+    },
+  },
+};
+
+fs.writeFileSync('swagger.json', JSON.stringify(swagger, null, 2), 'utf8');

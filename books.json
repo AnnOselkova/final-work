@@ -1,0 +1,34 @@
+{
+    "books" [
+      {
+        "bookId":" 0",
+        "title": "1984",
+        "author": "George Orwell",
+        
+      },
+      {
+        "bookId":"1",
+        "title": "To Kill a Mockingbird",
+        "author": "Harper Lee",
+        
+      },
+      {
+        "bookId":"2",
+        "title": "The Great Gatsby",
+        "author": "F. Scott Fitzgerald",
+        
+      },
+      {
+        "bookId":" 3",
+        "title": "Pride and Prejudice",
+        "author": "Jane Austen",
+        
+      },
+      {
+        "bookId":"5",
+        "title": "Harry Potter and the Philosopher's Stone",
+        "author": "J.K. Rowling",
+        
+      }
+    ]
+  }
