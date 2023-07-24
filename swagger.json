@@ -1,4 +1,4 @@
-const swagger = {
+{
   openapi: '3.0.0',
   info: {
     title: 'Book API',
@@ -228,6 +228,4 @@ d',
       },
     },
   },
-};
-
-fs.writeFileSync('swagger.json', JSON.stringify(swagger, null, 2), 'utf8');
+}
